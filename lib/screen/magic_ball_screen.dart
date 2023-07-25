@@ -1,13 +1,25 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:magic_ball/controllers/sharedpref_controller.dart';
-import 'package:magic_ball/widgets/ball_widget.dart';
-import 'package:magic_ball/widgets/bottom_light_widget.dart';
+import 'package:magic_ball/widgets/sizeanimatedlight_widget.dart';
+import 'package:magic_ball/widgets/updownanimatedball_widget.dart';
 
-class MagicBallScreen extends StatelessWidget {
-  MagicBallScreen({super.key});
+class MagicBallScreen extends StatefulWidget {
+  const MagicBallScreen({super.key});
 
+  @override
+  State<MagicBallScreen> createState() => _MagicBallScreenState();
+}
+
+class _MagicBallScreenState extends State<MagicBallScreen> {
   final SharedprefController prefcont = Get.find<SharedprefController>();
+  bool isError = false;
+
+  void setError(bool value) {
+    setState(() {
+      isError = value;
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -25,15 +37,18 @@ class MagicBallScreen extends StatelessWidget {
               ),
             ),
           ),
-          const Column(
+          Column(
             children: [
-              Spacer(flex: 3),
-              UpDowhAnimatedBall(),
-              Spacer(),
+              const Spacer(flex: 3),
+              ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 400),
+                child: UpDowhAnimatedBall(setError: setError),
+              ),
+              const Spacer(),
               // BottomLightWidget(),
-              SizeAnimatedLight(),
-              Spacer(),
-              Padding(
+              SizeAnimatedLight(isError: isError),
+              const Spacer(),
+              const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
                   'Нажмите на шар или встряхните устройство.',
@@ -45,20 +60,20 @@ class MagicBallScreen extends StatelessWidget {
                   textAlign: TextAlign.center,
                 ),
               ),
-              Spacer(
+              const Spacer(
                 flex: 2,
               )
             ],
           ),
           Positioned(
-            top: 10,
+            top: 40,
             right: 0,
             child: IconButton(
               onPressed: () {
                 prefcont.setVoicing(!prefcont.isVoicing);
               },
-              icon: Obx(() =>
-                Icon(
+              icon: Obx(
+                () => Icon(
                   prefcont.$isVoicing.value ? Icons.volume_up : Icons.volume_off,
                   color: const Color(0xFF727272),
                 ),
@@ -67,102 +82,6 @@ class MagicBallScreen extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class UpDowhAnimatedBall extends StatefulWidget {
-  const UpDowhAnimatedBall({super.key});
-
-  @override
-  State<UpDowhAnimatedBall> createState() => _UpDowhAnimatedBallState();
-}
-
-class _UpDowhAnimatedBallState extends State<UpDowhAnimatedBall> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late Animation<Offset> animation;
-  late Animation<Offset> idleanimation;
-  bool animates = true;
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-    animation = Tween<Offset>(
-      begin: const Offset(0, 0.04),
-      end: const Offset(0, -0.04),
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    idleanimation = Tween<Offset>(
-      begin: const Offset(0, 0.04),
-      end: const Offset(0, 0.04,),
-    ).animate(_controller);
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return SlideTransition(
-      position: animates ? animation : idleanimation,
-      child: BallWidget(onTap: () {
-        setState(() {
-          animates = !animates;
-        });
-      }),
-    );
-  }
-}
-
-class SizeAnimatedLight extends StatefulWidget {
-  const SizeAnimatedLight({super.key});
-
-  @override
-  State<SizeAnimatedLight> createState() => _SizeAnimatedLightState();
-}
-
-class _SizeAnimatedLightState extends State<SizeAnimatedLight> with SingleTickerProviderStateMixin {
-  late final AnimationController _controller;
-  late Animation<double> animation;
-  late Animation<double> idleanimation;
-  bool animates = true;
-
-  @override
-  void initState() {
-    _controller = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
-    animation = Tween<double>(
-      begin: 1.04,
-      end: 0.96,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
-    idleanimation = Tween<double>(
-      begin: 1.04,
-      end: 1.04,
-    ).animate(_controller);
-
-    super.initState();
-  }
-
-  @override
-  void dispose() {
-    _controller.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return ScaleTransition(
-      scale: animates ? animation : idleanimation,
-      child: const BottomLightWidget()
     );
   }
 }

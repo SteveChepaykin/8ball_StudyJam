@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 class BottomLightWidget extends StatelessWidget {
-  const BottomLightWidget({super.key});
+  final bool error;
+  const BottomLightWidget({super.key, required this.error});
 
   @override
   Widget build(BuildContext context) {
@@ -21,6 +22,7 @@ class BottomLightWidget extends StatelessWidget {
               child: Image.asset(
                 'assets/Ellipse 7.png',
                 scale: 2,
+                color: error ? Colors.red : Colors.transparent,
               ),
             ),
           ],
